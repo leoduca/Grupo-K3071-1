@@ -3,6 +3,8 @@ syms t n
 %A = [0 2*pi];
 %f = [t^2];
 
+
+
 f = sym(f);
 T = max(A)-min(A);
 wo = 2*pi/(T);
@@ -50,12 +52,10 @@ Bn = simple(sym(strrep(char(Bn), 'cos(2*pi*n)', '1')));
 
 An = simple(sym(strrep(char(An), 'cos(2*n*pi)', '1')));
 Bn = simple(sym(strrep(char(Bn), 'cos(2*n*pi)', '1')));
-% 
+
 
 coeficientes(1) = Ao;
 coeficientes(2) = An;
 coeficientes(3) = Bn;
+coeficientes(4) = wo;
 
-%set(handles.text8, 'String', strcat('Ao = ', char(Ao)));
-%set(handles.text11, 'String', strcat('An = ', char(An)));
-%set(handles.text12, 'String', strcat('Bn = ', char(Bn)));

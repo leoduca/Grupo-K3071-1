@@ -22,7 +22,7 @@ function varargout = Main(varargin)
 
 % Edit the above text to modify the response to help Main
 
-% Last Modified by GUIDE v2.5 12-Oct-2015 16:27:03
+% Last Modified by GUIDE v2.5 05-Nov-2015 12:40:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -164,9 +164,10 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 syms x t
 
+%Graficar Funcion
 clc
-axes(handles.axes1)
-set(handles.axes1, 'visible', 'on')
+axes(handles.axes1);
+set(handles.axes1, 'visible', 'on');
 cla
 A = str2num(get(handles.edit2, 'String'));
 f = eval(get(handles.edit1, 'String'));
@@ -181,11 +182,194 @@ for i=1:length(A)-1
 end
 plot(x, fx, 'Linewidth', 2); 
 hold off;
-%plot(x+max(x)-min(x), fx, 'Linewidth', 2) 
-%plot(x-max(x)+min(x), fx, 'Linewidth', 2)
-%plot([max(x) max(x)],[fx(1) fx(end)], 'linewidth', 2)
-%plot([min(x) min(x)],[fx(end) fx(1)], 'linewidth', 2)
 grid on;
-%xlabel('\bfTIEMPO');
-%ylabel('\bfAMPLITUD');
-%title('\bfGRAFICA DE LA FUNCION');
+
+
+function calcularError(handles)
+%%OBTENGO LA SERIE
+vecFunciones = get(handles.edit1, 'String');
+intervalos = get(handles.edit2, 'String');
+armonicas = str2num(get(handles.edit3, 'String'));
+vecIntervalos = str2num(intervalos);
+coeficientes = seriefourier(vecIntervalos, vecFunciones);
+
+Ao_2 = coeficientes(1);
+An = coeficientes(2);
+Bn = coeficientes(3);
+wo = coeficientes(4);
+syms n t;
+%t=linspace (0,2*pi);
+serie = Ao_2 + symsum(An*cos(n*wo*t),n,1,armonicas) + symsum(Bn*sin(n*wo*t),n,1,armonicas);
+
+%%OBTENGO FX ORIGINAL
+A = str2num(get(handles.edit2, 'String'));
+f = eval(get(handles.edit1, 'String'));
+x = linspace(min(A), max(A), 1000);
+serieCompuesta = f - serie;
+
+inicio = min(A);
+fin = max(A);
+syms x;
+sDeX = subs(serieCompuesta,t,x);
+fx = subs(f,t,x);
+
+
+numerador = int(abs(sDeX), 'x',inicio, fin);
+denominador = int(abs(fx), 'x',inicio, fin);
+
+aprox = vpa(numerador, 9);
+
+error = numerador / denominador;
+set(handles.text15, 'String', strcat('Error: ', char(error)));
+% fx = 0;
+% for i=1:length(A)-1
+%     if mod(i, 2) == 1
+%     fx = fx+((x>=A(i))&(x<=A(i+1))).*subs(f(i),x);
+%     else
+%     fx = fx+((x>A(i))&(x<A(i+1))).*subs(f(i),x);
+%     end
+% end
+
+
+% --- Executes on button press in pushbutton4.
+function pushbutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%GRAFICO LA SERIE%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+vecFunciones = get(handles.edit1, 'String');
+intervalos = get(handles.edit2, 'String');
+armonicas = str2num(get(handles.edit3, 'String'));
+vecIntervalos = str2num(intervalos);
+coeficientes = seriefourier(vecIntervalos, vecFunciones);
+
+chequearArmonica(armonicas, handles);
+
+clc
+axes(handles.axes2);
+set(handles.axes2, 'visible', 'on');
+cla
+
+Ao_2 = coeficientes(1);
+An = coeficientes(2);
+Bn = coeficientes(3);
+wo = coeficientes(4);
+syms n;
+t=linspace (-2*pi,2*pi);
+%t = linspace(min(intervalos), max(intervalos), 1000);
+serie = Ao_2 + symsum(An*cos(n*wo*t),n,1,armonicas) + symsum(Bn*sin(n*wo*t),n,1,armonicas);
+
+plot(t, serie); 
+hold off;
+grid on;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%CALCULO COEFICIENTES An%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clc
+axes(handles.axes3);
+set(handles.axes3, 'visible', 'on');
+cla
+
+Ao_2 = coeficientes(1);
+An = coeficientes(2);
+Bn = coeficientes(3);
+wo = coeficientes(4);
+
+coeficientesAn=1:armonicas;
+syms n;
+for i=1:armonicas,
+    coeficientesAn(i)= subs(An,i);
+end
+
+stem(coeficientesAn); 
+hold off;
+grid on;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%CALCULO COEFICIENTES Bn%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clc
+axes(handles.axes4);
+set(handles.axes4, 'visible', 'on');
+cla
+
+coeficientesBn=1:armonicas;
+syms n;
+for i=1:armonicas,
+    coeficientesBn(i)= subs(Bn,i);
+end
+
+stem(coeficientesBn); 
+hold off;
+grid on;
+
+calcularError(handles);
+
+% --- Executes on button press in pushbutton5.
+%%function pushbutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%GRAFICO DE LOS COEFICIENTES
+% 
+% vecFunciones = get(handles.edit1, 'String');
+% intervalos = get(handles.edit2, 'String');
+% armonicas = str2num(get(handles.edit3, 'String'));
+% vecIntervalos = str2num(intervalos);
+% coeficientes = seriefourier(vecIntervalos, vecFunciones);
+% 
+% chequearArmonica(armonicas, handles);
+% clc
+% axes(handles.axes3);
+% set(handles.axes3, 'visible', 'on');
+% cla
+% 
+% Ao_2 = coeficientes(1);
+% An = coeficientes(2);
+% Bn = coeficientes(3);
+% wo = coeficientes(4);
+% 
+% coeficientesAn=1:armonicas;
+% syms n;
+% for i=1:armonicas,
+%     coeficientesAn(i)= subs(An,i);
+% end
+% 
+% stem(coeficientesAn); 
+% hold off;
+% grid on;
+% 
+% %COEFICIENTES Bn
+% clc
+% axes(handles.axes4);
+% set(handles.axes4, 'visible', 'on');
+% cla
+% 
+% coeficientesBn=1:armonicas;
+% syms n;
+% for i=1:armonicas,
+%     coeficientesBn(i)= subs(Bn,i);
+% end
+% 
+% stem(coeficientesBn); 
+% hold off;
+% grid on;
+%  
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%CHEQUEO SI ME PASO DE 50%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function chequearArmonica(armonicas, handles)
+if (armonicas > 50)
+   set(handles.text14, 'String', 'La cantidad de armonicas no puede ser mayor a 50!' );
+   msg = 'La cantidad de armonicas no puede ser mayor a 50!';
+   error(msg);
+else
+    set(handles.text14, 'String', strcat('Cantidad de coeficientes: ', num2str(armonicas)));
+end
