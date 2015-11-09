@@ -202,7 +202,7 @@ syms n t;
 %t=linspace (0,2*pi);
 serie = Ao_2 + symsum(An*cos(n*wo*t),n,1,armonicas) + symsum(Bn*sin(n*wo*t),n,1,armonicas);
 f = eval(get(handles.edit1, 'String'));
-
+f = sym(f);
 for i=1:length(f)
     serieCompuesta(i) = f(i) - serie;
     numerador(i) = vpa(int(abs(serieCompuesta(i)), 't',vecIntervalos(i), vecIntervalos(i+1)), 5);
@@ -255,7 +255,8 @@ An = coeficientes(2);
 Bn = coeficientes(3);
 wo = coeficientes(4);
 syms n;
-t=linspace (-2*pi,2*pi);
+t = linspace (min(vecIntervalos), max(vecIntervalos))
+%t=linspace (-2*pi,2*pi);
 %t = linspace(min(intervalos), max(intervalos), 1000);
 serie = Ao_2 + symsum(An*cos(n*wo*t),n,1,armonicas) + symsum(Bn*sin(n*wo*t),n,1,armonicas);
 

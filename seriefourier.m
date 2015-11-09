@@ -2,11 +2,9 @@ function coeficientes = seriefourier(A, f)
 syms t n
 %A = [0 2*pi];
 %f = [t^2];
-
-
-
 f = sym(f);
-T = max(A)-min(A);
+
+T = max(A)- min(A);
 wo = 2*pi/(T);
 
 Ao = 0;
