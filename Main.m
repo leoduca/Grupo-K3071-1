@@ -189,9 +189,10 @@ function calcularError(handles)
 %%OBTENGO LA SERIE
 vecFunciones = get(handles.edit1, 'String');
 intervalos = get(handles.edit2, 'String');
-armonicas = str2num(get(handles.edit3, 'String'));
 vecIntervalos = str2num(intervalos);
+armonicas = str2num(get(handles.edit3, 'String'));
 coeficientes = seriefourier(vecIntervalos, vecFunciones);
+intervalo = str2num(get(handles.edit2, 'String'));
 
 Ao_2 = coeficientes(1);
 An = coeficientes(2);
@@ -200,27 +201,22 @@ wo = coeficientes(4);
 syms n t;
 %t=linspace (0,2*pi);
 serie = Ao_2 + symsum(An*cos(n*wo*t),n,1,armonicas) + symsum(Bn*sin(n*wo*t),n,1,armonicas);
+f = eval(get(handles.edit1, 'String'));
+
+for i=1:length(f)
+    serieCompuesta(i) = f(i) - serie;
+    numerador(i) = vpa(int(abs(serieCompuesta(i)), 't',vecIntervalos(i), vecIntervalos(i+1)), 5);
+    denominador(i) = vpa(int(abs(f(i)), 't',vecIntervalos(i), vecIntervalos(i+1)), 5);
+end
+sumNumerador = sum(numerador);
+sumDenominador = sum (denominador)
+errorPorcentual = round(sumNumerador / sumDenominador * 100);
+set(handles.text15, 'String', strcat(strcat('Error: ', char(errorPorcentual), '%')));
+
 
 %%OBTENGO FX ORIGINAL
-A = str2num(get(handles.edit2, 'String'));
-f = eval(get(handles.edit1, 'String'));
-x = linspace(min(A), max(A), 1000);
-serieCompuesta = f - serie;
 
-inicio = min(A);
-fin = max(A);
-syms x;
-sDeX = subs(serieCompuesta,t,x);
-fx = subs(f,t,x);
-
-
-numerador = int(abs(sDeX), 'x',inicio, fin);
-denominador = int(abs(fx), 'x',inicio, fin);
-
-aprox = vpa(numerador, 9);
-
-error = numerador / denominador;
-set(handles.text15, 'String', strcat('Error: ', char(error)));
+%x = linspace(min(A), max(A), 1000);
 % fx = 0;
 % for i=1:length(A)-1
 %     if mod(i, 2) == 1
