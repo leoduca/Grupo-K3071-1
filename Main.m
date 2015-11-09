@@ -22,7 +22,7 @@ function varargout = Main(varargin)
 
 % Edit the above text to modify the response to help Main
 
-% Last Modified by GUIDE v2.5 05-Nov-2015 12:40:43
+% Last Modified by GUIDE v2.5 09-Nov-2015 17:42:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -212,7 +212,46 @@ sumNumerador = sum(numerador);
 sumDenominador = sum (denominador)
 errorPorcentual = round(sumNumerador / sumDenominador * 100);
 set(handles.text15, 'String', strcat(strcat('Error: ', char(errorPorcentual), '%')));
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+function armonicasErrorMenorA5(handles)
+vecFunciones = get(handles.edit1, 'String');
+intervalos = get(handles.edit2, 'String');
+vecIntervalos = str2num(intervalos);
+coeficientes = seriefourier(vecIntervalos, vecFunciones);
+intervalo = str2num(get(handles.edit2, 'String'));
+
+Ao_2 = coeficientes(1);
+An = coeficientes(2);
+Bn = coeficientes(3);
+wo = coeficientes(4);
+syms n t;
+%t=linspace (0,2*pi);
+errorPorcentual = 6.00;
+armonicas = 1; 
+while (errorPorcentual>5.00)
+    serie = Ao_2 + symsum(An*cos(n*wo*t),n,1,armonicas) + symsum(Bn*sin(n*wo*t),n,1,armonicas);
+    f = eval(get(handles.edit1, 'String'));
+    f = sym(f);
+    for i=1:length(f)
+        serieCompuesta(i) = f(i) - serie;
+        numerador(i) = vpa(int(abs(serieCompuesta(i)), 't',vecIntervalos(i), vecIntervalos(i+1)), 5);
+        denominador(i) = vpa(int(abs(f(i)), 't',vecIntervalos(i), vecIntervalos(i+1)), 5);
+    end
+    sumNumerador = sum(numerador);
+    sumDenominador = sum (denominador)
+    errorPorcentual = round(sumNumerador / sumDenominador * 100);
+    armonicas = armonicas + 1 ;
+    if (armonicas > 30)
+        set(handles.text16, 'String', 'Para que e<5% las armonicas se pasan de 50!' );
+       msg = 'Para que e<5% las armonicas se pasan de 50!';
+       error(msg);
+       break;
+    end
+end
+    set(handles.text16, 'String', strcat('Armonicas e<5%:  ', num2str(abs(armonicas))));
 
 %%OBTENGO FX ORIGINAL
 
@@ -370,3 +409,11 @@ if (armonicas > 50)
 else
     set(handles.text14, 'String', strcat('Cantidad de coeficientes: ', num2str(armonicas)));
 end
+
+
+% --- Executes on button press in pushbutton6.
+function pushbutton6_Callback(hObject, eventdata, handles)
+    armonicasErrorMenorA5(handles);
+% hObject    handle to pushbutton6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
